@@ -1,12 +1,20 @@
 package com.example.kadohiraharuki.mycountdowntimer
 
 import android.content.IntentSender
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.SoundPool
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    //SoundPoolクラスインスタンスとサウンドファイルのリソースIDを保持するプロパティを宣言
+    private lateinit var soundPool: SoundPool
+    private var soundResId = 0
 
     //コトリンでインナークラスを使うとき、innerを先頭に加える
     inner class MyCountDownTimer(millisInFuture: Long, countDownInterval: Long) :
@@ -23,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onFinish() {
             timerText.text = "0:00"
+            soundPool.play(soundResId, 1.0f, 100f, 0, 0, 1.0f)
         }
     }
 
@@ -50,5 +59,39 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //アクテビティが表示された時にメモリにロード
+        super.onResume()
+        //アクテビティが画面に表示された時に実行されるonResumeメソッド内で、SoundPoolのインスタンスを作成
+        soundPool =
+                //Build.VERSION.SDK_INTには実行中のOSバージョン番号が入っている、Lollipopの場合は21が格納されている
+                //バージョンが5.0より前の場合
+                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+                    //非推奨のメソッドを使っているが、対応済みのため検査不要と示唆する
+                    @Suppress("DEPRECATION")
+                    SoundPool(2, AudioManager.STREAM_ALARM, 0)
+                }
+                else {
+                    val audioAttributes = AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .build()
+                    SoundPool.Builder()
+                            //同時に音を流す数を設定
+                            .setMaxStreams(1)
+                            .setAudioAttributes(audioAttributes)
+                            .build()
+                }
+                //loadメソッドを使って、登録したサウンドリソースを読み込む
+                    soundResId = soundPool.load(this, R.raw.bellsound, 1)
+
+    }
+
+    override fun onPause() {
+        //他のアプリを起動するなどしてアクテビティが非表示になった時メモリを開放
+        super.onPause()
+        soundPool.release()
     }
 }
