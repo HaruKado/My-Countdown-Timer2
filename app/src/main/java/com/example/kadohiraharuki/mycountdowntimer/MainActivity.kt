@@ -17,16 +17,18 @@ class MainActivity : AppCompatActivity() {
     private var soundResId = 0
 
     //コトリンでインナークラスを使うとき、innerを先頭に加える
+    //CountDownTimerを継承したMyCountDownTimerクラスを作成
     inner class MyCountDownTimer(millisInFuture: Long, countDownInterval: Long) :
         CountDownTimer(millisInFuture, countDownInterval){
     //カウントダウン中か停止中か表すフラグ
         var isRunning = false
 
+        //onTickメソッド：コンストラクタで指定した間隔で分、秒を読み出す
         override fun onTick(millisUntilFinished: Long){
             //残り時間の分と秒を取り出してテキストビューに表示
             val minute = millisUntilFinished / 1000L / 60L
             val second = millisUntilFinished / 1000L % 60L
-            timerText.text = "%id:%2$02d".format(minute, second)
+            timerText.text = "%1d:%2$02d".format(minute, second)
         }
 
         override fun onFinish() {
